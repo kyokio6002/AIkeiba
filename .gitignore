@@ -1,0 +1,17 @@
+# keys
+*.pem
+*.key
+
+# conf and ...
+*.swp
+.DS_Store
+__pycache__/
+.idea/
+*.pyc
+
+# my
+*.pickle
+*.csv
+model/*/
+*h5
+simple.py
