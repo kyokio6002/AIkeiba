@@ -116,7 +116,7 @@ class Model:
                             mode='auto'  # 収束判定
                          )
         learning_rates = np.linspace(0.01, 0.0001, self.epochs)
-t        learning_rateScheduler = LearningRateScheduler(lambda epoch: float(learning_rates[epoch]))
+        learning_rateScheduler = LearningRateScheduler(lambda epoch: float(learning_rates[epoch]))
 
         callbacks = [early_stopping, learning_rateScheduler]
         return callbacks
