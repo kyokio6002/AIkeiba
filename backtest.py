@@ -103,12 +103,15 @@ def test(races):
             result.append(odds_sum)
             result.append(str('-'))
             result.append(back)
+        result.append(len(race))
 
-        race.to_csv('aaa.csv')
         results.append(result)
     print(f'race_num:{race_num}')
     print(f'error_race_num:{error_race_num}')
+
     results = pd.DataFrame(results)
+    columns = ['レース名', '○|×', '馬名', '収支', 'オッズ', '利益', '頭数']
+    results.columns = columns
     results.to_csv('restult.csv')
 
 
