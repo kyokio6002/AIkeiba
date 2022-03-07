@@ -23,33 +23,9 @@ def make_dataset():
     # load learn_data
     test_data = pd.read_csv('data/test_data.csv', index_col=0)
     test_data = test_data.reset_index(drop=True)
-    for i in test_data.columns:
-        print(i)
-    print(test_data)
-
-    drop_index = test_data.index[(test_data['着順'].str.contains('中')) |
-                                 (test_data['着順'].str.contains('除')) |
-                                 (test_data['着順'].str.contains('取')) |
-                                 (test_data['着順'].str.contains('降')) |
-                                 (test_data['着順'].str.contains('失')) |
-                                 (test_data['単勝'].str.contains('---'))]
-    test_data = test_data.drop(drop_index)
-    test_data = test_data.reset_index(drop=True)
-    print(test_data)
-
-    # 型変換
-    labels = ['index', 'レース名', '馬名']
-    for label in test_data.columns:
-        if label in labels:
-            continue
-        test_data[label] = test_data[label].astype(float)
-    # for label in test_data.columns:
-    #     print(f'{label}:{test_data[label].dtype}')
-    test_data.to_csv('bbb.csv')
 
     # raceごとに区切る
     race_top_index = test_data.query('num == 0').index
-    print(race_top_index)
     races = []
     for i in range(len(race_top_index)-1):
         start = race_top_index[i]
@@ -72,28 +48,70 @@ def make_dataset():
 
 def test(races):
     model = keras.models.load_model('./model/mymodel.h5')
-
-    # results(レース名, 馬名(一位), 収支, odds, back,)
+    # results(レース名, ○or×, 馬名(一位), 収支, odds, back,)
     results = []
+    race_num = 0
+    error_race_num = 0
+    odds_sum = 0
+    back = 0
 
-    for race in races[3:]:
-        print(race)
+    for race in races:
+        try:
+            # 型変換
+            labels = ['index', 'レース名', '馬名']
+            for label in race.columns:
+                if label in labels:
+                    continue
+                race[label] = race[label].astype(float)
+        except ValueError:
+            # エラー値を含むレースは除外する
+            error_race_num += 1
+            continue
+        print('\r', f'race_num:{race_num}/{len(races)}, error_race_num:{error_race_num}/{len(races)}', end='')
+
+        # 予測&dataframe作成
+        # print(race)
+        race_num += 1
         result = [race['レース名'][0]]
         # x and y(ans)
         drops = ['num', 'レース名', '馬名', 'タイム指数', '上り', '着順', '馬id']
         x = race.drop(drops, axis=1)
-        y = race['タイム指数']
-        predicts = model.predict(x)
-        predicts = pd.Series(predicts.T[0])
-        for i, predict in enumerate(predicts):
-            print('ans:{:.1f}, predict:{}, diff:{:.1f}'.format(predict, y.iloc[i], abs(predict-y.iloc[i])))
+        predicts = pd.Series(model.predict(x).T[0]).rename('predict')
+        # y = race['タイム指数']
+        # for i, predict in enumerate(predicts):
+        #     print('ans:{:.1f}, predict:{}, diff:{:.1f}'.format(predict, y.iloc[i], abs(predict-y.iloc[i])))
         race = pd.concat([race, predicts], axis=1, join='inner')
-        race.sort_values('着順')
-        race.to_csv('aaa.csv')
+        race = race.sort_values(by=['predict'], ascending=False)
+        race.reset_index(drop=True, inplace=True)
 
-        break
+        # 判定
+        horse_name = race.iloc[0, 5]
+        odds = race.iloc[0, 10]
+        if int(race.iloc[0, 2]) == 1:
+            result.append('○')
+            result.append(horse_name)
+            odds_sum += odds
+            back += odds-1
+            result.append(odds_sum)
+            result.append(str(odds))
+            result.append(back)
+        else:
+            result.append('×')
+            result.append(horse_name)
+            odds_sum += -1
+            back += -1
+            result.append(odds_sum)
+            result.append(str('-'))
+            result.append(back)
+
+        race.to_csv('aaa.csv')
+        results.append(result)
+    print(f'race_num:{race_num}')
+    print(f'error_race_num:{error_race_num}')
+    results = pd.DataFrame(results)
+    results.to_csv('restult.csv')
 
 
 if __name__ == '__main__':
-    races = make_dataset()
-    test(races)
+    _races = make_dataset()
+    test(_races)
