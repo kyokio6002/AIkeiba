@@ -65,7 +65,7 @@ def make_dataset():
 
 class Model:
     def __init__(self, x_train, x_test, y_train, y_test):
-        self.epochs = 10
+        self.epochs = 100
         self.history = None
         self.x_test = x_test
         self.y_test = y_test
@@ -80,27 +80,31 @@ class Model:
         # model
         model = Sequential()
         model.add(Dense(512, activation='relu', input_shape=input_shape))
-        model.add(BatchNormalization(epsilon=0.001))
+        # model.add(BatchNormalization(epsilon=0.001))
         # model.add(keras.layers.Dropout(0.3))
         model.add(Dense(256, activation='relu'))
         model.add(Dense(256, activation='relu'))
-        model.add(BatchNormalization(epsilon=0.001))
+        # model.add(BatchNormalization(epsilon=0.001))
         # model.add(keras.layers.Dropout(0.3))
         model.add(Dense(128, activation='relu'))
         model.add(Dense(128, activation='relu'))
-        model.add(BatchNormalization(epsilon=0.001))
+        # model.add(BatchNormalization(epsilon=0.001))
         # model.add(keras.layers.Dropout(0.3))
         model.add(Dense(64, activation='relu'))
         model.add(Dense(64, activation='relu'))
-        model.add(BatchNormalization(epsilon=0.001))
+        # model.add(BatchNormalization(epsilon=0.001))
         # model.add(keras.layers.Dropout(0.3))
         model.add(Dense(32, activation='relu'))
         model.add(Dense(32, activation='relu'))
-        model.add(BatchNormalization(epsilon=0.001))
+        # model.add(BatchNormalization(epsilon=0.001))
         # model.add(keras.layers.Dropout(0.3)))
         model.add(Dense(16, activation='relu'))
         model.add(Dense(16, activation='relu'))
-        model.add(BatchNormalization(epsilon=0.001))
+        # model.add(BatchNormalization(epsilon=0.001))
+        # model.add(keras.layers.Dropout(0.3))
+        model.add(Dense(8, activation='relu'))
+        model.add(Dense(8, activation='relu'))
+        # model.add(BatchNormalization(epsilon=0.001))
         # model.add(keras.layers.Dropout(0.3))
         model.add(Dense(1))
         model.summary()
@@ -118,15 +122,14 @@ class Model:
     def make_callbacks(self):
         early_stopping = EarlyStopping(
                             monitor='val_loss',  # 監視対象
-                            # patience=100,  # 最低ループ数
-                            patience=20,
+                            patience=10,
                             verbose=0,  # 保存時の出力にコメント
                             mode='auto'  # 収束判定
                          )
         learning_rates = np.linspace(0.01, 0.0001, self.epochs)
-        learning_rateScheduler = LearningRateScheduler(lambda epoch: float(learning_rates[epoch]))
+        learning_rate_scheduler = LearningRateScheduler(lambda epoch: float(learning_rates[epoch]))
 
-        callbacks = [early_stopping, learning_rateScheduler]
+        callbacks = [early_stopping, learning_rate_scheduler]
         return callbacks
 
     def fit(self):
@@ -167,6 +170,7 @@ class Model:
     def test(self):
         x_test = self.x_test
         y_test = self.y_test
+        self.model.evaluate(x=x_test, y=y_test, verbose=1)
 
         # roopのためにindex降り直し
         X_test.reset_index(inplace=True, drop=True)
