@@ -1,15 +1,7 @@
 '''make and learn model'''
-import keras
-from keras.callbacks import EarlyStopping
-from keras.callbacks import LearningRateScheduler
-
-import matplotlib.pyplot as plt
-
-import numpy as np
+from keras.models import load_model
 
 import pandas as pd
-
-from sklearn.model_selection import train_test_split
 
 from tensorflow.keras.initializers import he_normal
 from tensorflow.keras.layers import BatchNormalization, Dense
@@ -46,8 +38,8 @@ def make_dataset():
     return races
 
 
-def test(races):
-    model = keras.models.load_model('./model/mymodel.h5')
+def backtest(races):
+    model = load_model('./model/mymodel.h5')
     # results(レース名, ○or×, 馬名(一位), 収支, odds, back,)
     results = []
     race_num = 0
@@ -116,5 +108,5 @@ def test(races):
 
 
 if __name__ == '__main__':
-    _races = make_dataset()
-    test(_races)
+    Races = make_dataset()
+    backtest(Races)
