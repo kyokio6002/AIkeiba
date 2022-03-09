@@ -124,9 +124,9 @@ class Model:
                             mode='auto'  # 収束判定
                          )
         learning_rates = np.linspace(0.01, 0.0001, self.epochs)
-        learning_rateScheduler = LearningRateScheduler(lambda epoch: float(learning_rates[epoch]))
+        learning_rate_scheduler = LearningRateScheduler(lambda epoch: float(learning_rates[epoch]))
 
-        callbacks = [early_stopping, learning_rateScheduler]
+        callbacks = [early_stopping, learning_rate_scheduler]
         return callbacks
 
     def fit(self):
@@ -167,6 +167,7 @@ class Model:
     def test(self):
         x_test = self.x_test
         y_test = self.y_test
+        self.model.evaluate(x=x_test, y=y_test, verbose=1)
 
         # roopのためにindex降り直し
         X_test.reset_index(inplace=True, drop=True)
