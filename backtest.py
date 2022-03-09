@@ -112,7 +112,7 @@ def test(races):
     results = pd.DataFrame(results)
     columns = ['レース名', '○|×', '馬名', '収支', 'オッズ', '利益', '頭数']
     results.columns = columns
-    results.to_csv('restult.csv')
+    results.to_csv('result.csv')
 
 
 if __name__ == '__main__':
